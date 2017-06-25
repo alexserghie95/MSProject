@@ -1,0 +1,50 @@
+install dhcp server
+sudo apt-get install isc-dhcp-server
+
+setup dhcp
+subnet 10.10.0.0 netmask 255.255.255.0 {
+range 10.10.0.25 10.10.0.50;
+option domain-name-servers 8.8.4.4;
+option routers 10.10.0.1;
+interface wlan0;
+}
+
+install hostapd for hosting access point
+sudo apt-get install hostapd
+
+configure hostapd
+
+to create/edit hostapd.conf
+nano /etc/hostapd/hostapd.conf
+
+add these lines to hostapd.conf file
+interface=wlan0
+driver=nl80211
+ssid=PIbrary
+hw_mode=g
+channel=11
+wpa=1
+wpa_passphrase=msproject
+wpa_key_mgmt=WPA-PSK
+wpa_pairwise=TKIP
+wpa_ptk_rekey=600
+macaddr_acl=0
+
+to make persistent
+nano /etc/network/interfaces
+
+add these following lines
+auto wlan0
+iface wlan0 inet static
+address 10.10.0.1
+netmask 255.255.255.0
+
+nano /etc/rc.local
+add these lines
+
+hostapd -B /etc/hostapd/hostapd.conf
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+
+add this line to sysctl.conf
+nano /etc/sysctl.conf
+net.ipv4.ip_forward = 0
